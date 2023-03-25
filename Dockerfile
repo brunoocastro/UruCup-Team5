@@ -1,60 +1,65 @@
-FROM robocupssl/grsim
-
-COPY /scripts ./src/
-
+# Starting from a ROS Noetic image
+FROM ros:noetic-ros-core-focal
 SHELL ["/bin/bash", "-c"]
-# ENV DEBIAN_FRONTEND=noninteractive
 
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-vcstools \
+    python3-catkin-tools \
+    python3-osrf-pycommon \
+    && rm -rf /var/lib/apt/lists/*
+
+# bootstrap rosdep
+RUN rosdep init && \
+  rosdep update --rosdistro $ROS_DISTRO
+
+# Install ros packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-ros-base=1.5.0-1* \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install and update ubuntu packages
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt update && \
-    apt install -y \
-        python-pip \
-        python-tk \
+# Install python packages
+RUN apt install -y python3 python3-pip
 
-# RUN apt update -y
+# Creating a ROS workspace to SSL data
+RUN mkdir ssl_ws && cd ssl_ws && mkdir src && cd src
 
-# RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list' && \
-#     apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+# Install grSim dependencies
+RUN apt install -y git build-essential cmake pkg-config qt5-default \
+                   libqt5opengl5-dev libgl1-mesa-dev libglu1-mesa-dev \
+                   libprotobuf-dev protobuf-compiler libode-dev libboost-dev
 
-# RUN apt update && \
-#     apt install -y \
-#         python-pip \
-#         python-tk \
-#         ros-melodic-desktop-full \
-#         python-rosdep \
-#         python-rosinstall \
-#         python-rosinstall-generator \
-#         python-wstool \
-#         build-essential \
-#         ros-melodic-joy \
-#         ros-melodic-tf2-sensor-msgs \
-#         ros-melodic-rosbash \
-#         ros-melodic-rviz \
-#         ros-melodic-teleop-twist-joy \
-#         ros-melodic-teleop-twist-keyboard \
-#         ros-melodic-laser-proc \
-#         ros-melodic-rgbd-launch \
-#         ros-melodic-depthimage-to-laserscan \
-#         ros-melodic-rosserial-arduino \
-#         ros-melodic-rosserial-python \
-#         ros-melodic-rosserial-server \
-#         ros-melodic-rosserial-client \
-#         ros-melodic-rosserial-msgs \
-#         ros-melodic-amcl \
-#         ros-melodic-map-server \
-#         ros-melodic-move-base \
-#         ros-melodic-urdf \
-#         ros-melodic-robot-state-publisher \
-#         ros-melodic-xacro \
-#         ros-melodic-compressed-image-transport \
-#         ros-melodic-rqt-image-view \
-#         ros-melodic-gmapping \
-#         ros-melodic-navigation \
-#         ros-melodic-interactive-markers
+# Clone another packages
+RUN cd /ssl_ws/src && \
+    git clone https://github.com/Los-UruBots-del-Norte/vision_comm.git && \
+    git clone https://github.com/Los-UruBots-del-Norte/grsim_ros_bridge_msgs.git && \
+    git clone https://github.com/Los-UruBots-del-Norte/grsim_ros_bridge.git && \
+    git clone https://github.com/KRSSG/krssg_ssl_msgs.git
 
-# Build catkin_ws
-# RUN mkdir -p /catkin_ws/src && \
-#     rosdep init && \
-#     rosdep update
-# WORKDIR /catkin_ws/src
+
+# Correcting an error at grsim_ros_bridge package
+RUN cd /ssl_ws/src/grsim_ros_bridge/scripts && ls && \
+    sed -i "s|/home/ricardo/ssl_ws|/ssl_ws|g" run_grsim.py
+
+# Clone SSL simulator
+RUN cd ssl_ws && git clone https://github.com/RoboCup-SSL/grSim.git
+
+# Enter the grSim folder
+RUN cd ssl_ws/grSim && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=usr/local .. && make
+
+# Copy the data folder to the workspace
+COPY /src /ssl_ws/src/data
+
+# Build the workspace
+RUN source opt/ros/noetic/setup.bash && cd /ssl_ws && catkin_make
+
+# Launch package
+# RUN cd /ssl_ws && roslaunch grsim_ros_bridge launch.launch

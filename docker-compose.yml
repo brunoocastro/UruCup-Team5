@@ -1,6 +1,24 @@
 version: "3.9"
 services:
   ros:
+    container_name: ros
     build: .
+    stdin_open: true
+    tty: true
     volumes:
       - .:/data
+
+  grsim:
+    container_name: grsim
+    image: robocupssl/grsim
+    ports:
+      - 5900:5900
+    environment:
+      - VNC_PASSWORD=vnc
+      - VNC_GEOMETRY=1920x1080
+    command: 
+      vnc
+
+networks:
+  default:
+    name: urucup_ssl
