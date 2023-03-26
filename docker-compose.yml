@@ -1,6 +1,22 @@
 version: "3.9"
 services:
   ros:
+    container_name: ros
     build: .
+    environment:
+      - VNC_PASSWORD=vnc
+      - VNC_GEOMETRY=1920x1080
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=$XAUTHORITY
     volumes:
       - .:/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: host
+
+networks:
+  default:
+    name: urucup_ssl
