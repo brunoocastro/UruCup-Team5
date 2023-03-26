@@ -3,21 +3,19 @@ services:
   ros:
     container_name: ros
     build: .
-    stdin_open: true
-    tty: true
-    volumes:
-      - .:/data
-
-  grsim:
-    container_name: grsim
-    image: robocupssl/grsim
-    ports:
-      - 5900:5900
     environment:
       - VNC_PASSWORD=vnc
       - VNC_GEOMETRY=1920x1080
-    command: 
-      vnc
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=$XAUTHORITY
+    volumes:
+      - .:/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: host
 
 networks:
   default:

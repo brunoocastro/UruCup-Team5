@@ -1,15 +1,17 @@
+ARG := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+$(eval $(ARG):;@true)
+
 build:
 	xhost +si:localuser:root &&	docker build . -t urucup/ssl
-
-openTerminal:
-	docker run -it urucup-team5-ros /bin/bash
 
 down: 
 	docker-compose down 
 
 up: 
-	docker-compose up 
+	bash docker/run-grsim.sh $(ARG)
 
-upWithBuild: 
-	docker-compose up -d --no-deps --build ros
+perms:
+	sudo chown -hR ${USER}:${USER} .
 
+access:
+	docker exec -it $(ARG) bash

@@ -42,7 +42,6 @@ RUN cd /ssl_ws/src && \
     git clone https://github.com/Los-UruBots-del-Norte/grsim_ros_bridge.git && \
     git clone https://github.com/KRSSG/krssg_ssl_msgs.git
 
-
 # Correcting an error at grsim_ros_bridge package
 RUN cd /ssl_ws/src/grsim_ros_bridge/scripts && ls && \
     sed -i "s|/home/ricardo/ssl_ws|/ssl_ws|g" run_grsim.py
@@ -61,5 +60,5 @@ COPY /src /ssl_ws/src/data
 # Build the workspace
 RUN source opt/ros/noetic/setup.bash && cd /ssl_ws && catkin_make
 
-# Launch package
-# RUN cd /ssl_ws && roslaunch grsim_ros_bridge launch.launch
+# Install python dependencies of grsim_ros_bridge package
+RUN pip install /ssl_ws/src/grsim_ros_bridge/ssl-python-clients
