@@ -32,11 +32,12 @@ And need another packages:
 Follow step-by-step to run totally the simulation
 
 1. grant permissions:	`make perms`
-2. up our container:   	`make up`
-3. open another terminal and take the container id by the command:	`docker ps`
-4. access your container at terminal (pass your container id):	`make access <container_id>`
-5. source ros environment:	`source devel/setup.bash`
-6. run the main package: 	`roslaunch grsim_ros_bridge launch.launch`
+2. build the container:    `make build`
+3. up your container:   	`make up`
+4. open another terminal and take the container id by the command:	`docker ps`
+5. access your container at terminal (pass your container id):	`make access <container_id>`
+6. source ros environment:	`source devel/setup.bash`
+7. run the main package: 	`roslaunch grsim_ros_bridge launch.launch`
 
 Now the simulation in running. You can interact with them right now!
 
