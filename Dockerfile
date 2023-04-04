@@ -1,9 +1,11 @@
 # Starting from a ROS Noetic image
 FROM ros:noetic-ros-core-focal
+
 SHELL ["/bin/bash", "-c"]
 
 # install bootstrap tools
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    gedit \
     build-essential \
     python3-rosdep \
     python3-rosinstall \
@@ -50,12 +52,12 @@ RUN cd /ssl_ws/src/grsim_ros_bridge/scripts && ls && \
 RUN cd ssl_ws && git clone https://github.com/RoboCup-SSL/grSim.git
 
 # Enter the grSim folder
-RUN cd ssl_ws/grSim && \
+RUN cd /ssl_ws/grSim && \
     mkdir build && cd build && \
     cmake -DCMAKE_INSTALL_PREFIX=usr/local .. && make
 
 # Copy the data folder to the workspace
-COPY /src /ssl_ws/src/data
+COPY /src /ssl_ws/src
 
 # Build the workspace
 RUN source opt/ros/noetic/setup.bash && cd /ssl_ws && catkin_make

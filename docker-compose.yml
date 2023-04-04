@@ -9,8 +9,10 @@ services:
       - DISPLAY=$DISPLAY
       - QT_X11_NO_MITSHM=1
       - XAUTHORITY=$XAUTHORITY
+    restart: always
     volumes:
-      - .:/data
+      - packages:/src/packages
+      - .:/
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     stdin_open: true
     tty: true
@@ -20,3 +22,6 @@ services:
 networks:
   default:
     name: urucup_ssl
+
+volumes:
+  packages: {}
